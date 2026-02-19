@@ -5,7 +5,7 @@ param location string
 param storageAccountName string
 
 resource stg 'Microsoft.Storage/storageAccounts@2023-01-01' = {
-  name: jacklabs123
+  name: storageAccountName
   location: location
   kind: 'StorageV2'
   sku: {
@@ -13,20 +13,9 @@ resource stg 'Microsoft.Storage/storageAccounts@2023-01-01' = {
   }
   properties: {
     allowBlobPublicAccess: true
-    minimumTlsVersion: 'TLS1_2'
     supportsHttpsTrafficOnly: true
+    minimumTlsVersion: 'TLS1_2'
     publicNetworkAccess: 'Enabled'
-  }
-}
-
-resource blob 'Microsoft.Storage/storageAccounts/blobServices@2023-01-01' = {
-  name: '${stg.name}/default'
-  properties: {
-    staticWebsite: {
-      enabled: true
-      indexDocument: 'index.html'
-      error404Document: '404.html'
-    }
   }
 }
 
