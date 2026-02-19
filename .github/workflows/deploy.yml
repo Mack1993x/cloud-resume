@@ -22,9 +22,9 @@ jobs:
         with:
           inlineScript: |
             az deployment group create \
-              --resource-group "<YOUR_RESOURCE_GROUP_NAME>" \
+              --resource-group "rg-labs" \ 
               --template-file "infra/main.bicep" \
-              --parameters location="<YOUR_REGION>" storageAccountName="${{ secrets.AZURE_STORAGE_ACCOUNT }}" tags='{"project":"cloud-resume"}'
+              --parameters location="UK South" storageAccountName="${{ secrets.AZURE_STORAGE_ACCOUNT }}" tags='{"project":"cloud-resume"}' 
 
       # 3) Upload site content to $web
       - name: Upload site to $web
