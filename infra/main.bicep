@@ -1,15 +1,33 @@
-- name: Deploy Bicep (Storage + Static Website)
-  uses: azure/CLI@v2
-  with:
-    inlineScript: |
-      RG="rg-labs" 
-      LOCATION="uksouth"   # example: uksouth / ukwest / westeurope etc.
-      STG="${{ secrets.AZURE_STORAGE_ACCOUNT }}"
+@description('Location for resources, e.g. uksouth')
+param location string
 
-      ls -la
-      ls -la infra
+@description('Storage account name (lowercase, 3-24 chars, globally unique)')
+param storageAccountName string
 
-      az deployment group create \
-        --resource-group "$RG" \
-        --template-file "infra/main.bicep" \
-        --parameters location="$LOCATION" storageAccountName="$STG"
+resource stg 'Microsoft.Storage/storageAccounts@2023-01-01' = {
+  name: jacklabs123
+  location: location
+  kind: 'StorageV2'
+  sku: {
+    name: 'Standard_LRS'
+  }
+  properties: {
+    allowBlobPublicAccess: true
+    minimumTlsVersion: 'TLS1_2'
+    supportsHttpsTrafficOnly: true
+    publicNetworkAccess: 'Enabled'
+  }
+}
+
+resource blob 'Microsoft.Storage/storageAccounts/blobServices@2023-01-01' = {
+  name: '${stg.name}/default'
+  properties: {
+    staticWebsite: {
+      enabled: true
+      indexDocument: 'index.html'
+      error404Document: '404.html'
+    }
+  }
+}
+
+output staticWebEndpoint string = stg.properties.primaryEndpoints.web
