@@ -1,9 +1,28 @@
+name: Deploy infra + site to Azure Storage Static Website
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
       - name: Deploy Bicep (Storage + Static Website)
         shell: bash
         run: |
           set -euo pipefail
-          RG="jacklabs123"
-          LOCATION="uksouth"   # change if needed (must be like uksouth/ukwest/westeurope)
+          RG="jacklabs123"         # <-- your Resource Group name (looks like this is it)
+          LOCATION="uksouth"       # <-- keep as uksouth unless your storage account is elsewhere
           STG="${{ secrets.AZURE_STORAGE_ACCOUNT }}"
 
           ls -la
@@ -13,3 +32,13 @@
             --resource-group "$RG" \
             --template-file "infra/main.bicep" \
             --parameters location="$LOCATION" storageAccountName="$STG"
+
+      - name: Upload site to $web
+        shell: bash
+        run: |
+          az storage blob upload-batch \
+            --account-name "${{ secrets.AZURE_STORAGE_ACCOUNT }}" \
+            --account-key "${{ secrets.AZURE_STORAGE_KEY }}" \
+            --destination '$web' \
+            --source ./site \
+            --overwrite
