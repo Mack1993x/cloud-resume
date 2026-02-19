@@ -1,4 +1,4 @@
-name: Deploy to Azure Storage Static Website
+name: Deploy infra + site to Azure Storage Static Website
 
 on:
   push:
@@ -10,6 +10,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # 1) Login to Azure (uses the AZURE_CREDENTIALS secret)
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      # 2) Deploy Bicep (infra)
+      - name: Deploy Bicep (Storage + Static Website)
+        uses: azure/CLI@v2
+        with:
+          inlineScript: |
+            az deployment group create \
+              --resource-group "<YOUR_RESOURCE_GROUP_NAME>" \
+              --template-file "infra/main.bicep" \
+              --parameters location="<YOUR_REGION>" storageAccountName="${{ secrets.AZURE_STORAGE_ACCOUNT }}" tags='{"project":"cloud-resume"}'
+
+      # 3) Upload site content to $web
       - name: Upload site to $web
         uses: azure/CLI@v2
         with:
