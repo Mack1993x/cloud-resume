@@ -21,7 +21,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          RG="jacklabs123"
+          RG="rg-labs"
           LOCATION="uksouth"
           STG="${{ secrets.AZURE_STORAGE_ACCOUNT }}"
 
